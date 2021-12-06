@@ -1,0 +1,9 @@
+name = "SlimPlotting"
+uuid = "f6d04670-764e-495b-a720-91c3c9a588ff"
+authors = ["Mathias Louboutin <mathias.louboutin@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
+PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
