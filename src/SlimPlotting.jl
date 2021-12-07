@@ -1,21 +1,22 @@
 module SlimPlotting
 
-using PyPlot, Statistics
+using PyPlot, Statistics, ColorSchemes
 
 const cc = PyPlot.PyNULL()
 
 __init__() = copy!(cc, PyPlot.pyimport("colorcet"))
 
 export plot_fslice, plot_velocity, plot_simage, plot_sdata
+export colorschemes
 
 """
-    _plot_with_units(image, spacing; perc=98, cmap=:linear_grey_10_95_c0_n256,
+    _plot_with_units(image, spacing; perc=98, cmap=:cet_CET_L1,
                 o=(0, 0), interp="hanning", aspect=nothing, d_scale=1.5,
                 name="RTM", units="m", new_fig=true, save=nothing)
 
 Plot a 2D grided image with physical units defined by the grid spacing `spacing`.
 """
-function _plot_with_units(image, spacing; perc=95, cmap=:gray, 
+function _plot_with_units(image, spacing; perc=95, cmap=:cet_CET_L1, 
                           o=(0, 0), interp="hanning", aspect=nothing, d_scale=0, positive=false,
                           labels=(:X, :Depth), units=(:m, :m), name="RTM", new_fig=true, save=nothing)
     nz, nx = size(image)
@@ -29,6 +30,8 @@ function _plot_with_units(image, spacing; perc=95, cmap=:gray,
     extent = [ox, ox+ (nx-1)*dx, oz+(nz-1)*dz, oz]
     isnothing(aspect) && (aspect = :auto)
 
+    # color map
+    cmap = try ColorMap(cmap); catch; ColorMap(colorschemes[cmap].colors); end
     new_fig && figure()
     # Plot
     imshow(scaled, vmin=ma, vmax=a, cmap=cmap, aspect=aspect, interpolation=interp, extent=extent)
@@ -121,7 +124,7 @@ end
 
 # Defaults
 _funcs = [:plot_simage, :plot_fslice, :plot_velocity, :plot_sdata]
-_default_colors = [:gray, :cet_CET_D1A, :cet_rainbow4, :gray]
+_default_colors = [:cet_CET_L1, :cet_CET_D1A, :cet_rainbow4, :cet_CET_L1]
 _names = ["RTM", "Frequency slice", "Velocity", "Shot record"]
 _units = [(:m, :m), (:m, :m), (:m, :m), (:s, :m)]
 _labels = [(:X, :Depth), (:Xsrc, :Xrec), (:X, :Depth), (:Xrec, :T)]
@@ -138,5 +141,7 @@ for (func, cmap, pname, u ,l) ∈ zip(_funcs, _default_colors, _names, _units, _
         end
     end
 end
+
+include("wiggles.jl")
 
 end # module

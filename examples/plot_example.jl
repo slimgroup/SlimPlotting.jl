@@ -1,5 +1,5 @@
 # Add JLD2 and SegyIO to load the data if needed
-using SlimPlotting, SegyIO, JLD2
+using SlimPlotting, SegyIO, JLD2, PyPlot
 SlimPlotting.PyPlot.close(:all)
 data_path = dirname(pathof(SlimPlotting))*"/../data/";
 
@@ -33,14 +33,38 @@ fslicep = Phys(fslice["Freq"][1, :, :], (12.5, 12.5))
 shotp = shotrec(shot, 0.004, geometry([xloc]))
 
 # plots
-plot_simage(dmp)
-plot_simage(dm, (10, 20))
+# RTM/perturbation
+figure(figsize=(10, 10))
+subplot(211)
+plot_simage(dmp; new_fig=false, name="colorcet gray", cmap="cet_CET_L1")
+subplot(212)
+plot_simage(dm, (10, 20); cmap="Greys", new_fig=false, name="Greys")
+tight_layout()
 
-plot_velocity(vpp)
-plot_velocity(vp, (10, 20))
+# Velocity/physical parameter
+figure(figsize=(10, 10))
+subplot(211)
+plot_velocity(vpp; new_fig=false, name="colorcet jet", cmap="cet_rainbow4")
+subplot(212)
+plot_velocity(vp, (10, 20); cmap=:vik, new_fig=false, name="ColorSchemes's vik")
+tight_layout()
 
-plot_fslice(fslice["Freq"][1, :, :], (12.5, 12.5))
-plot_fslice(fslicep)
+# Frequency slice
+figure(figsize=(10, 5))
+subplot(121)
+plot_fslice(fslice["Freq"][1, :, :], (12.5, 12.5); new_fig=false, name="colorcet bwr")
+subplot(122)
+plot_fslice(fslicep; cmap=:bwr, new_fig=false, name="bwr")
+tight_layout()
 
-plot_sdata(shotp)
-plot_sdata(shot, (0.004, 12.5))
+# Shot record
+figure(figsize=(10, 5))
+subplot(121)
+plot_sdata(shotp; new_fig=false, name="colorcet gray", cmap="cet_CET_L1")
+subplot(122)
+plot_sdata(shot, (0.004, 12.5); cmap="gray", new_fig=false, name="Greys")
+tight_layout()
+
+# Wiggle plot
+figure(figsize=(10, 5))
+wiggle_plot(shot[1:5:end, 1:10:end], xloc[1:10:end], 0:0.02:4.6; new_fig=false)
