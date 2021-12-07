@@ -6,8 +6,8 @@ data_path = dirname(pathof(SlimPlotting))*"/../data/";
 # Pure array
 vp = Float32.(segy_read("$(data_path)2dVP.sgy").data);
 dm = 1f0 .* vp; dm[2:end, :] .-= dm[1:end-1, :];
-shot = Float32.(segy_read("$(data_path)2dShot.segy").data);
-xloc = get_header(segy_read("$(data_path)2dShot.segy"), "GroupX")
+shot = Float32.(segy_read("$(data_path)2dshot.segy").data);
+xloc = get_header(segy_read("$(data_path)2dshot.segy"), "GroupX")
 fslice = load("$(data_path)2dfslice.jld");
 
 # Dummy structures to check plot with metadata
