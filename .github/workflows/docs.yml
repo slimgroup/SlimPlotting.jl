@@ -15,8 +15,13 @@ jobs:
       - uses: julia-actions/setup-julia@latest
       
       - name: Install dependencies
-        run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+        run: |
+          /usr/bin/python3 -m pip install matplotlib colorcet
+          julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
       
+      - name: Setup README
+        run: cp README.md docs/src/README.md
+
       - name: Build and deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # For authentication with GitHub Actions token

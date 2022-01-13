@@ -30,7 +30,7 @@ end
 dmp = Phys(dm, (10, 20))
 vpp = Phys(vp, (10, 20))
 fslicep = Phys(fslice["Freq"][1, :, :], (12.5, 12.5))
-shotp = shotrec(shot, 0.004, geometry([xloc]))
+shotp = shotrec(shot, 0.008, geometry([xloc]))
 
 # plots
 # RTM/perturbation
@@ -62,7 +62,7 @@ figure(figsize=(10, 5))
 subplot(121)
 plot_sdata(shotp; new_fig=false, name="colorcet gray", cmap="cet_CET_L1")
 subplot(122)
-plot_sdata(shot, (0.004, 12.5); cmap="gray", new_fig=false, name="Greys")
+plot_sdata(shot, (12.5, 0.008); cmap="gray", new_fig=false, name="Greys")
 tight_layout()
 
 # Wiggle plot

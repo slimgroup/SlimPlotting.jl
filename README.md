@@ -1,13 +1,14 @@
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://slimgroup.github.io/SlimPlotting.jl/dev/)
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://slimgroup.github.io/SlimPlotting.jl/stable/)
 
+
 # SlimPlotting
 
 Utitliy function to plot physically gridded data. The functions currently only supports 2D data.
 
 ## Disclaimer
 
-This ia a small package that I started to make my life easier visualizing data and results easily. Not all functionalities are tested and some of the features may need additional options for better images.  This package is under developpement and weclomes contributions throug [Issues](https://github.com/slimgroup/SlimPlotting.jl/issues), [Pull Requests](https://github.com/slimgroup/SlimPlotting.jl/pulls) or [Discussions](https://github.com/slimgroup/SlimPlotting.jl/discussions)
+This is a small package that I started to make my life easier visualizing data and results easily. Not all functionalities are tested and some of the features may need additional options for better images.  This package is under developpement and weclomes contributions throug [Issues](https://github.com/slimgroup/SlimPlotting.jl/issues), [Pull Requests](https://github.com/slimgroup/SlimPlotting.jl/pulls) or [Discussions](https://github.com/slimgroup/SlimPlotting.jl/discussions)
  
 ## Functionalities
 
@@ -31,7 +32,7 @@ The expected inputs are:
  containing the time sampling rate and `structure.d` containing the receiver spacing (uniform sampling is assumed at the time) and `structure.data` containing the 2D array.
 -  `wiggle_plot(array, xrec, time_axis; kw...)`. In this case, `xrec, time_axis` are optional and wil default to `1:size(array, 2)`, `1:size(array, 1)` respectively.
 
-and you can check the doctring (julia `]?`) for additional information on the optional keyword arguments.
+and you can check the doctring (julia `?`) for additional information on the optional keyword arguments.
 
 ## Color maps
 
@@ -45,5 +46,5 @@ All functionality, with the exeption of `wiggle_plot` accept the keyword argumen
 
 # Authors
 
-This package is developped and maintained by Mathias Louboutin<mlouboutin3@gatech.edu> and the ML4Seismic LAbe at Georgia Institute of Technology.
+This package is developped and maintained by Mathias Louboutin<mlouboutin3@gatech.edu> and the ML4Seismic Lab at Georgia Institute of Technology.
 

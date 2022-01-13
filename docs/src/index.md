@@ -1,13 +1,6 @@
 # SLimPlotting.jl documentation
 
-```@meta
-CurrentModule = SlimPlotting
-```
+Welcome to the documentation and API reference for SLimPlotting.jl.
 
-```@docs
-plot_fslice
-plot_velocity
-plot_simage
-plot_sdata
+```@contents
 ```
-
