@@ -10,15 +10,33 @@ export plot_fslice, plot_velocity, plot_simage, plot_sdata, wiggle_plot
 export colorschemes
 
 """
-    _plot_with_units(image, spacing; perc=98, cmap=:cet_CET_L1,
-                o=(0, 0), interp="hanning", aspect=nothing, d_scale=1.5,
-                name="RTM", units="m", new_fig=true, save=nothing)
+    _plot_with_units(image, spacing; perc=95, cmap=:cet_CET_L1, 
+                     o=(0, 0), interp="hanning", aspect=nothing, d_scale=0,
+                     positive=false, labels=(:X, :Depth), cbar=false,
+                     units=(:m, :m), name="RTM", new_fig=true, save=nothing)
 
 Plot a 2D grided image with physical units defined by the grid spacing `spacing`.
+
+# Arguments
+  - `image::Array{T, 2}`: image to be plotted
+  - `spacing::Tuple`: grid spacing in physical units
+  - `perc::Int`: (Optional) Clipping percentile, default=95
+  - `cmap::Symbol`: (Optional) Color map, default=:linear_grey_10_95_c0_n256
+  - `o::Tuple`: (Optional) Origin of the image, default=(0, 0)
+  - `interp::String`: (Optional) Interpolation method, default="hanning"
+  - `aspect::Symbol`: (Optional) Aspect ratio, default=:auto
+  - `d_scale::Float`: (Optional) Depth scaling, default=1.5. Applied scaling is `(1:max_depth).^d_scale`.
+  - `positive::Bool`: (Optional) Plot positive only image (clip `[0:max(image)]`), default=false
+  - `labels::Tuple`: (Optional) Labels for the axes, default=(:X, :Depth)
+  - `name::String`: (Optional) Figure title, default="RTM"
+  - `units::Tuple(String)`: (Optional) Physical units of each axis, default=(:m, :m).
+  - `new_fig::Bool`: (Optional) Create a new figure, default=true
+  - `save::String`: (Optional) Save figure to file, default=nothing doesn't save the figure
+  - `cbar::Bool`: (Optional) Show colorbar, default=false
 """
 function _plot_with_units(image, spacing; perc=95, cmap=:cet_CET_L1, 
                           o=(0, 0), interp="hanning", aspect=nothing, d_scale=0,
-                          positive=false, labels=(:X, :Depth),
+                          positive=false, labels=(:X, :Depth), cbar=false,
                           units=(:m, :m), name="RTM", new_fig=true, save=nothing)
     nz, nx = size(image)
     dz, dx = spacing
@@ -39,7 +57,7 @@ function _plot_with_units(image, spacing; perc=95, cmap=:cet_CET_L1,
     xlabel("$(labels[1]) [$(units[1])]")
     ylabel("$(labels[2]) [$(units[2])]")
     title("$name")
-    colorbar(fraction=0.046, pad=0.04)
+    cbar && colorbar(fraction=0.046, pad=0.04)
 
     if ~isnothing(save)
     save == true ? filename=name : filename=save
@@ -51,9 +69,27 @@ end
 """
     plot_simage(image, spacing; perc=98, cmap=:linear_grey_10_95_c0_n256,
                 o=(0, 0), interp="hanning", aspect=nothing, d_scale=1.5,
-                name="RTM", units="m", new_fig=true, save=nothing)
+                labels=(:X, :Depth), name="RTM", units=(:m, :m), new_fig=true,
+                save=nothing, cbar=false)
 
-Plot a 2D seismic image with a grid spacing `spacing`.
+Plot a 2D seismic image with a grid spacing `spacing`. Calls [`_plot_with_units`](@ref).
+
+# Arguments
+  - `image::Array{T, 2}`: image to be plotted
+  - `spacing::Tuple`: grid spacing in physical units
+  - `perc::Int`: (Optional) Clipping percentile, default=95
+  - `cmap::Symbol`: (Optional) Color map, default=:linear_grey_10_95_c0_n256
+  - `o::Tuple`: (Optional) Origin of the image, default=(0, 0)
+  - `interp::String`: (Optional) Interpolation method, default="hanning"
+  - `aspect::Symbol`: (Optional) Aspect ratio, default=:auto
+  - `d_scale::Float`: (Optional) Depth scaling, default=1.5. Applied scaling is `(1:max_depth).^d_scale`.
+  - `labels::Tuple`: (Optional) Labels for the axes, default=(:X, :Depth)
+  - `name::String`: (Optional) Figure title, default="RTM"
+  - `units::Tuple(String)`: (Optional) Physical units of each axis, default=(:m, :m).
+  - `new_fig::Bool`: (Optional) Create a new figure, default=true
+  - `save::String`: (Optional) Save figure to file, default=nothing doesn't save the figure
+  - `cbar::Bool`: (Optional) Show colorbar, default=false
+
 """
 function plot_simage(image; kw...)
     d = try image.d; catch nothing; end
@@ -70,7 +106,24 @@ end
                 o=(0, 0), interp="hanning", aspect=nothing, d_scale=1.5,
                 name="RTM", units="m", new_fig=true, save=nothing)
 
-Plot a 2D frequency slice of seismic data.
+Plot a 2D frequency slice of seismic data. Calls [`_plot_with_units`](@ref).
+
+# Arguments
+  - `image::Array{T, 2}`: image to be plotted
+  - `spacing::Tuple`: grid spacing in physical units
+  - `perc::Int`: (Optional) Clipping percentile, default=95
+  - `cmap::Symbol`: (Optional) Color map, default=:diverging_bwr_20_95_c54_n256
+  - `o::Tuple`: (Optional) Origin of the image, default=(0, 0)
+  - `interp::String`: (Optional) Interpolation method, default="hanning"
+  - `aspect::Symbol`: (Optional) Aspect ratio, default=:auto
+  - `d_scale::Float`: (Optional) Depth scaling, default=1.5. Applied scaling is `(1:max_depth).^d_scale`.
+  - `labels::Tuple`: (Optional) Labels for the axes, default=(:X, :Depth)
+  - `name::String`: (Optional) Figure title, default="RTM"
+  - `units::Tuple(String)`: (Optional) Physical units of each axis, default=(:m, :m).
+  - `new_fig::Bool`: (Optional) Create a new figure, default=true
+  - `save::String`: (Optional) Save figure to file, default=nothing doesn't save the figure
+  - `cbar::Bool`: (Optional) Show colorbar, default=false
+
 """
 function plot_fslice(image; kw...)
     @warn "No grid spacing specified, plotting with a 1m grid spacing"
@@ -81,11 +134,28 @@ end
 plot_fslice(image::AbstractArray{T}, args...; kw...) where {T<:Complex} = plot_fslice(real.(image), args...; kw...)
 
 """
-    plot_velocity(image, spacing; perc=98, cmap=:diverging_bwr_20_95_c54_n256,
+    plot_velocity(image, spacing; perc=98, cmap=:cet_rainbow,
                 o=(0, 0), interp="hanning", aspect=nothing, d_scale=1.5,
                 name="RTM", units="m", new_fig=true, save=nothing)
 
-Plot a velocity model.
+Plot a velocity model. Calls [`_plot_with_units`](@ref).
+
+# Arguments
+  - `image::Array{T, 2}`: image to be plotted
+  - `spacing::Tuple`: grid spacing in physical units
+  - `perc::Int`: (Optional) Clipping percentile, default=95
+  - `cmap::Symbol`: (Optional) Color map, default=:cet_rainbow
+  - `o::Tuple`: (Optional) Origin of the image, default=(0, 0)
+  - `interp::String`: (Optional) Interpolation method, default="hanning"
+  - `aspect::Symbol`: (Optional) Aspect ratio, default=:auto
+  - `d_scale::Float`: (Optional) Depth scaling, default=1.5. Applied scaling is `(1:max_depth).^d_scale`.
+  - `labels::Tuple`: (Optional) Labels for the axes, default=(:X, :Depth)
+  - `name::String`: (Optional) Figure title, default="RTM"
+  - `units::Tuple(String)`: (Optional) Physical units of each axis, default=(:m, :m).
+  - `new_fig::Bool`: (Optional) Create a new figure, default=true
+  - `save::String`: (Optional) Save figure to file, default=nothing doesn't save the figure
+  - `cbar::Bool`: (Optional) Show colorbar, default=false
+
 """
 function plot_velocity(image; kw...)
     d = try image.d; catch nothing; end
@@ -102,7 +172,24 @@ end
                 o=(0, 0), interp="hanning", aspect=nothing, d_scale=1.5,
                 name="RTM", units="m", new_fig=true, save=nothing)
 
-Plot seismic data gather (i.e shot record).
+Plot seismic data gather (i.e shot record). Calls [`_plot_with_units`](@ref).
+
+# Arguments
+  - `image::Array{T, 2}`: image to be plotted
+  - `spacing::Tuple`: grid spacing in physical units
+  - `perc::Int`: (Optional) Clipping percentile, default=95
+  - `cmap::Symbol`: (Optional) Color map, default=:linear_grey_10_95_c0_n256
+  - `o::Tuple`: (Optional) Origin of the image, default=(0, 0)
+  - `interp::String`: (Optional) Interpolation method, default="hanning"
+  - `aspect::Symbol`: (Optional) Aspect ratio, default=:auto
+  - `d_scale::Float`: (Optional) Depth scaling, default=1.5. Applied scaling is `(1:max_depth).^d_scale`.
+  - `labels::Tuple`: (Optional) Labels for the axes, default=(:X, :Depth)
+  - `name::String`: (Optional) Figure title, default="RTM"
+  - `units::Tuple(String)`: (Optional) Physical units of each axis, default=(:m, :m).
+  - `new_fig::Bool`: (Optional) Create a new figure, default=true
+  - `save::String`: (Optional) Save figure to file, default=nothing doesn't save the figure
+  - `cbar::Bool`: (Optional) Show colorbar, default=false
+
 """
 function plot_sdata(image; kw...)
     dt = try image.dt; catch nothing; end
@@ -149,6 +236,13 @@ end
                 new_fig=true)
 
 wiggle_plot of a seismic traces.
+
+# Arguments
+  - `image::Array{T, 2}`: Shot record to be plotted
+  - `xrec::Array{T, 1}`: Receiver coordinates
+  - `time_axis::Array{T, 1}`: Time axis
+  - `t_scale::Float`: (Optional) Time scaling, default=1.5. Applied scaling is `(1:max_time).^t_scale`.
+  - `new_fig::Bool`: (Optional) Create a new figure, default=true
 """
 function wiggle_plot(data::Array{Td, 2}, xrec=nothing, time_axis=nothing;
                      t_scale=1.5, new_fig=true) where Td
