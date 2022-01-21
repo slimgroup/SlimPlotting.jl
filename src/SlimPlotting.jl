@@ -4,7 +4,16 @@ using PyPlot, Statistics, ColorSchemes
 
 const cc = PyPlot.PyNULL()
 
-__init__() = copy!(cc, PyPlot.pyimport("colorcet"))
+
+function __init__()
+    try
+        copy!(cc, PyPlot.pyimport_conda("colorcet", "colorcet"))
+    catch e
+        # Not using julia's conda and not installed. Installing and loading
+        run(Cmd([PyPlot.PyCall.pyprogramname, "-m", "pip", "install", "-U", "--user", "colocet"]))
+        copy!(cc, PyPlot.pyimport("colorcet"))
+    end
+end
 
 export plot_fslice, plot_velocity, plot_simage, plot_sdata, wiggle_plot
 export colorschemes
