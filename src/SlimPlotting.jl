@@ -10,7 +10,7 @@ function __init__()
         copy!(cc, PyPlot.pyimport_conda("colorcet", "colorcet"))
     catch e
         # Not using julia's conda and not installed. Installing and loading
-        run(Cmd([PyPlot.PyCall.pyprogramname, "-m", "pip", "install", "-U", "--user", "colocet"]))
+        run(Cmd([PyPlot.PyCall.pyprogramname, "-m", "pip", "install", "-U", "--user", "colorcet"]))
         copy!(cc, PyPlot.pyimport("colorcet"))
     end
 end
