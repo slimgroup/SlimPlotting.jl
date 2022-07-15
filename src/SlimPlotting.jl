@@ -202,11 +202,10 @@ Plot seismic data gather (i.e shot record). Calls [`_plot_with_units`](@ref).
 
 """
 function plot_sdata(image; kw...)
-    dt = try image.dt; catch nothing; end
-    dx = try 
+    dt, dx = try 
         geom = try image.geometry; catch nothing; end
         geom = hasproperty(geom, :xloc) ? geom : Geometry(geom)
-        diff(geom.xloc[1])[1]
+        geom.dt[1], diff(geom.xloc[1])[1]
     catch
         nothing
     end
@@ -216,7 +215,8 @@ function plot_sdata(image; kw...)
     else
         d = (dt, dx)
     end
-    plot_sdata(image.data, d; kw...)
+    shot = hasproperty(image, :data) ? image.data[1] : image
+    plot_sdata(shot, d; kw...)
 end
 
 
