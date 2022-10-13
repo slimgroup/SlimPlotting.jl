@@ -17,6 +17,7 @@ end
 
 export plot_fslice, plot_velocity, plot_simage, plot_sdata, wiggle_plot
 export colorschemes
+export create_multi_color_map
 
 """
     _plot_with_units(image, spacing; perc=95, cmap=:cet_CET_L1, 
@@ -284,6 +285,45 @@ function wiggle_plot(data::Array{Td, 2}, xrec=nothing, time_axis=nothing;
     end
     ax.set_xlabel("X")
     ax.set_ylabel("Time")
+end
+
+"""
+    create_multi_color_map(intervals, cmap_types)
+
+Create a single colormap that assigns different portions of it to different sub-colormaps.
+
+# Arguments
+  - `intervals::Vector{Tuple{T, T}}`: intervals of values where each interval will be assigned to a different colormap
+  - `cmap_types::Vector{ColorMap}`: colormaps for each interval
+  - `out_of_interval_color`: (Optional) the color assigned to values that live outside of all the intervals, default is black [0.,0.,0.,1.]
+
+# Example
+    create_multi_color_map([(1,2),(3,4),(5,6)], [matplotlib.cm.YlGn,matplotlib.cm.Purples,matplotlib.cm.Reds])
+"""
+function create_multi_color_map(intervals::Vector{Tuple{T, T}}, cmap_types::Vector{ColorMap}; out_of_interval_color=[0.,0.,0.,1.]) where T
+
+    @assert length(intervals) == length(cmap_types) "number of intervals and number of colormaps do not match"
+    
+    # ensure at least 100 points in each interval
+    colorrange = intervals[1][1]:minimum([intervals[i][2]-intervals[i][1] for i = 1:length(intervals)])/1f2:intervals[end][2]
+             
+    # number of points in each colormap
+    colorlength = [Int.(round.((intervals[i][2]-intervals[i][1])./(colorrange[2]-colorrange[1]))) for i = 1:length(intervals)]
+    
+    # create each colormap
+    cmap_sections = [cmap_types[i](range(0f0, stop=1f0, length=colorlength[i])) for i = 1:length(cmap_types)]
+
+    # fill in out-of-interval by out_of_interval_color
+    between_interval_sections = [reshape(repeat(out_of_interval_color, inner=Int(round((intervals[i][1]-intervals[i-1][2])/(colorrange[2]-colorrange[1])))), :, 4) for i = 2:length(intervals)]
+    
+    # concatenate all the sections to get the entire colormap
+    total_sections = vcat(cmap_sections[1], vcat([vcat(between_interval_sections[i], cmap_sections[i+1]) for i = 1:length(cmap_sections)-1]...))
+
+    # construct the colormaps
+    cmaps = matplotlib.colors.ListedColormap(total_sections)
+    
+    return cmaps
+    
 end
 
 end # module
