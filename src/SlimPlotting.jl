@@ -230,12 +230,13 @@ _labels = [(:X, :Depth), (:Xsrc, :Xrec), (:X, :Depth), (:Xrec, :T)]
 for (func, cmap, pname, u ,l) ∈ zip(_funcs, _default_colors, _names, _units, _labels)
     @eval begin
         function $func(image, spacing; kw...)
-            cmap = haskey(kw, :cmap) ? kw[:cmap] : $(Meta.quot(cmap))
-            pname = haskey(kw, :name) ? kw[:name] : $(Meta.quot(pname))
-            u = haskey(kw, :units) ? [:units] : $(Meta.quot(u))
-            l = haskey(kw, :labels) ? [:labels] : $(Meta.quot(l))
+            kwd = Dict(kw)
+            cmap = pop!(kwd, :cmap, $(Meta.quot(cmap)))
+            pname = pop!(kwd, :name, $(Meta.quot(pname)))
+            u = pop!(kwd, :units, $(Meta.quot(u)))
+            l = pop!(kwd, :labels, $(Meta.quot(l)))
             positive = $func == plot_velocity
-            _plot_with_units(image, spacing; kw...,positive=positive, cmap=cmap, name=pname, units=u, labels=l)
+            _plot_with_units(image, spacing; kwd..., positive=positive, cmap=cmap, name=pname, units=u, labels=l)
         end
     end
 end
