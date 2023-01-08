@@ -68,3 +68,10 @@ tight_layout()
 # Wiggle plot
 figure(figsize=(10, 5))
 wiggle_plot(shot[1:5:end, 1:10:end], xloc[1:10:end], 0:0.02:4.6; new_fig=false)
+
+# plot with multiple colorscales
+figure(figsize=(10, 5))
+intervals = [(-3,-2),(-1,1),(2,3)]
+cmap_types = [matplotlib.cm.YlGn,matplotlib.cm.Purples,matplotlib.cm.Reds]
+cmap = create_multi_color_map(intervals, cmap_types)
+plot_simage(randn(Float32, 100, 100), (1, 1); cmap=cmap, new_fig=false, interp="none", name="colorful white noise")
