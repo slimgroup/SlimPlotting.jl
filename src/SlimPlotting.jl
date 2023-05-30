@@ -6,27 +6,27 @@ using Statistics, ColorSchemes, Reexport
 const cc = PyPlot.PyNULL()
 scm = Dict()
 
+
+function tryimport(pkg::String)
+    pyi = try
+        PyPlot.pyimport(pkg)
+    catch e
+        PyPlot.PyCall.Conda.pip_interop(true)
+        PyPlot.PyCall.Conda.pip("install", pkg)
+        PyPlot.pyimport(pkg)
+    end
+    return pyi
+end
+
 function __init__()
     # import seiscm
-    scmp = try
-        PyPlot.pyimport("seiscm")
-    catch e
-        # Installing and loading
-        run(Cmd([PyPlot.PyCall.pyprogramname, "-m", "pip", "install", "-U", "--user", "seiscm"]))
-        PyPlot.pyimport("seiscm")
-    end
+    scmp = tryimport("seiscm")
     global scm[:seismic] = scmp.seismic()
     global scm[:bwr] = scmp.seismic()
     global scm[:phase] = scmp.phase()
     global scm[:frequency] = scmp.frequency()
     # Import colorcet
-    try
-        copy!(cc, PyPlot.pyimport_conda("colorcet", "colorcet"))
-    catch e
-        # Not using julia's conda and not installed. Installing and loading
-        run(Cmd([PyPlot.PyCall.pyprogramname, "-m", "pip", "install", "-U", "--user", "colorcet"]))
-        copy!(cc, PyPlot.pyimport("colorcet"))
-    end
+    copy!(cc, tryimport("colorcet"))
 end
 
 export plot_fslice, plot_velocity, plot_simage, plot_sdata, wiggle_plot

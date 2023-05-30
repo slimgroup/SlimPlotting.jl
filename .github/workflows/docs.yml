@@ -9,16 +9,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PYTHON: ""
+
     steps:
       - uses: actions/checkout@v2
       
       - uses: julia-actions/setup-julia@latest
-      
+  
+      - name: Build SlimPlotting
+        uses: julia-actions/julia-buildpkg@latest
+
       - name: Install dependencies
         run: |
-          /usr/bin/python3 -m pip install matplotlib colorcet
           julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-      
+  
       - name: Setup README
         run: cp README.md docs/src/README.md
 
