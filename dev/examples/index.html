@@ -4,44 +4,7 @@ vp = Float32.(segy_read(&quot;$(data_path)2dVP.sgy&quot;).data);
 dm = diff(vp, dims=1);
 shot = Float32.(segy_read(&quot;$(data_path)2dshot.segy&quot;).data);
 xloc = get_header(segy_read(&quot;$(data_path)2dshot.segy&quot;), &quot;GroupX&quot;)
-fslice = JLD2.load(&quot;$(data_path)2dfslice.jld&quot;);</code></pre><pre><code class="language-none">Error: ArgumentError: Package JLD [4138dd39-2aa7-5051-a626-17a0bb65d9c8] is
- required but does not seem to be installed:
- - Run `Pkg.instantiate()` to install all recorded dependencies.
-
-Stacktrace:
-  [1] _require(pkg::Base.PkgId, env::Nothing)
-    @ Base ./loading.jl:1739
-  [2] _require_prelocked(uuidkey::Base.PkgId, env::Nothing)
-    @ Base ./loading.jl:1625
-  [3] _require_prelocked
-    @ ./loading.jl:1623 [inlined]
-  [4] macro expansion
-    @ ./lock.jl:267 [inlined]
-  [5] require(uuidkey::Base.PkgId)
-    @ Base ./loading.jl:1620
-  [6] #34
-    @ ~/.julia/packages/FileIO/BE7iZ/src/loadsave.jl:203 [inlined]
-  [7] lock(f::FileIO.var&quot;#34#35&quot;{Base.PkgId}, l::ReentrantLock)
-    @ Base ./lock.jl:229
-  [8] action(::Symbol, ::Vector{Union{Base.PkgId, Module}}, ::FileIO.Format
-ted; options::Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}
-)
-    @ FileIO ~/.julia/packages/FileIO/BE7iZ/src/loadsave.jl:203
-  [9] action
-    @ ~/.julia/packages/FileIO/BE7iZ/src/loadsave.jl:196 [inlined]
- [10] action(::Symbol, ::Vector{Union{Base.PkgId, Module}}, ::Symbol, ::Str
-ing; options::Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}
-)
-    @ FileIO ~/.julia/packages/FileIO/BE7iZ/src/loadsave.jl:185
- [11] action
-    @ ~/.julia/packages/FileIO/BE7iZ/src/loadsave.jl:185 [inlined]
- [12] load(::String; options::Base.Pairs{Symbol, Union{}, Tuple{}, NamedTup
-le{(), Tuple{}}})
-    @ FileIO ~/.julia/packages/FileIO/BE7iZ/src/loadsave.jl:113
- [13] load(::String)
-    @ FileIO ~/.julia/packages/FileIO/BE7iZ/src/loadsave.jl:109
- [14] top-level scope
-    @ ~/work/SlimPlotting.jl/SlimPlotting.jl/examples/plot_example.jl:7</code></pre><h1 id="Create-structures-to-mimic-JUDI-like-inputs"><a class="docs-heading-anchor" href="#Create-structures-to-mimic-JUDI-like-inputs">Create structures to mimic JUDI-like inputs</a><a id="Create-structures-to-mimic-JUDI-like-inputs-1"></a><a class="docs-heading-anchor-permalink" href="#Create-structures-to-mimic-JUDI-like-inputs" title="Permalink"></a></h1><p>In the future this should be instead converted into an extension rather than implicit knowledge of the structure</p><pre><code class="language-julia"># Dummy structures to check plot with metadata
+fslice = JLD2.load(&quot;$(data_path)2dfslice.jld&quot;);</code></pre><h1 id="Create-structures-to-mimic-JUDI-like-inputs"><a class="docs-heading-anchor" href="#Create-structures-to-mimic-JUDI-like-inputs">Create structures to mimic JUDI-like inputs</a><a id="Create-structures-to-mimic-JUDI-like-inputs-1"></a><a class="docs-heading-anchor-permalink" href="#Create-structures-to-mimic-JUDI-like-inputs" title="Permalink"></a></h1><p>In the future this should be instead converted into an extension rather than implicit knowledge of the structure</p><pre><code class="language-julia"># Dummy structures to check plot with metadata
 struct geometry
     xloc
 end
@@ -61,7 +24,7 @@ end
 dmp = Phys(dm, (10, 20))
 vpp = Phys(vp, (10, 20))
 fslicep = Phys(fslice[&quot;Freq&quot;][1, :, :], (12.5, 12.5))
-shotp = shotrec([shot], 0.008, geometry([xloc]));</code></pre><pre><code class="language-none">Error: UndefVarError: `fslice` not defined</code></pre><h1 id="Model-perturbation"><a class="docs-heading-anchor" href="#Model-perturbation">Model perturbation</a><a id="Model-perturbation-1"></a><a class="docs-heading-anchor-permalink" href="#Model-perturbation" title="Permalink"></a></h1><p>We plot here a model perturbation (i.e a Reverse-time Migrated image) and compare a few colormaps:</p><ul><li>The <code>seiscm.seimic</code> colormap</li><li>The standard matplotlib <code>Greys</code> colormap</li><li>The perceptually accurate <code>Greys</code> colormap from colorcet</li></ul><pre><code class="language-julia">figure(figsize=(10, 10))
+shotp = shotrec([shot], 0.008, geometry([xloc]));</code></pre><h1 id="Model-perturbation"><a class="docs-heading-anchor" href="#Model-perturbation">Model perturbation</a><a id="Model-perturbation-1"></a><a class="docs-heading-anchor-permalink" href="#Model-perturbation" title="Permalink"></a></h1><p>We plot here a model perturbation (i.e a Reverse-time Migrated image) and compare a few colormaps:</p><ul><li>The <code>seiscm.seimic</code> colormap</li><li>The standard matplotlib <code>Greys</code> colormap</li><li>The perceptually accurate <code>Greys</code> colormap from colorcet</li></ul><pre><code class="language-julia">figure(figsize=(10, 10))
 subplot(311)
 plot_simage(dmp; new_fig=false, name=&quot;Seismic&quot;)
 subplot(312)
@@ -83,7 +46,7 @@ subplot(132)
 plot_fslice(fslicep; cmap=:bwr, new_fig=false, name=&quot;bwr&quot;)
 subplot(133)
 plot_fslice(fslicep; cmap=seiscm(:bwr), new_fig=false, name=&quot;Seiscm bwr&quot;)
-tight_layout();display(gcf())</code></pre><pre><code class="language-none">Error: UndefVarError: `fslice` not defined</code></pre><h1 id="Shot-record"><a class="docs-heading-anchor" href="#Shot-record">Shot record</a><a id="Shot-record-1"></a><a class="docs-heading-anchor-permalink" href="#Shot-record" title="Permalink"></a></h1><h2 id="Seismic-blue-white-red"><a class="docs-heading-anchor" href="#Seismic-blue-white-red">Seismic blue-white-red</a><a id="Seismic-blue-white-red-1"></a><a class="docs-heading-anchor-permalink" href="#Seismic-blue-white-red" title="Permalink"></a></h2><p>We plot here a frequency slice for a seismic dataset and compare a few colormaps for the <code>bwr</code> colormap:</p><ul><li>The <code>seiscm.bwr</code> colormap</li><li>The standard matplotlib <code>bwr</code> colormap</li><li>The perceptually accurate <code>bwr</code> colormap from colorcet named <code>cet_CET_D1A</code></li></ul><pre><code class="language-julia"># Shot record
+tight_layout();display(gcf())</code></pre><p><img src="../figures/plot_example_8_1.png" alt/></p><h1 id="Shot-record"><a class="docs-heading-anchor" href="#Shot-record">Shot record</a><a id="Shot-record-1"></a><a class="docs-heading-anchor-permalink" href="#Shot-record" title="Permalink"></a></h1><h2 id="Seismic-blue-white-red"><a class="docs-heading-anchor" href="#Seismic-blue-white-red">Seismic blue-white-red</a><a id="Seismic-blue-white-red-1"></a><a class="docs-heading-anchor-permalink" href="#Seismic-blue-white-red" title="Permalink"></a></h2><p>We plot here a frequency slice for a seismic dataset and compare a few colormaps for the <code>bwr</code> colormap:</p><ul><li>The <code>seiscm.bwr</code> colormap</li><li>The standard matplotlib <code>bwr</code> colormap</li><li>The perceptually accurate <code>bwr</code> colormap from colorcet named <code>cet_CET_D1A</code></li></ul><pre><code class="language-julia"># Shot record
 figure(figsize=(10, 5))
 subplot(131)
 plot_sdata(shotp; new_fig=false, name=&quot;matplotlib seismic&quot;, cmap=&quot;bwr&quot;)
@@ -91,13 +54,13 @@ subplot(132)
 plot_sdata(shot, (12.5, 0.008); cmap=:cet_CET_D1A, new_fig=false, name=&quot;Colorcet bwr&quot;)
 subplot(133)
 plot_sdata(shot, (12.5, 0.008); cmap=seiscm(:bwr), new_fig=false, name=&quot;Seismic bwr&quot;)
-tight_layout();display(gcf())</code></pre><pre><code class="language-none">Error: UndefVarError: `shotp` not defined</code></pre><h2 id="Seismic-greys"><a class="docs-heading-anchor" href="#Seismic-greys">Seismic greys</a><a id="Seismic-greys-1"></a><a class="docs-heading-anchor-permalink" href="#Seismic-greys" title="Permalink"></a></h2><p>We plot here a frequency slice for a seismic dataset and compare a few colormaps for the <code>greys</code> colormap:</p><ul><li>The standard matplotlib <code>gray</code> colormap</li><li>The perceptually accurate <code>greys</code> colormap from colorcet named <code>cet_CET_L1</code></li></ul><pre><code class="language-julia"># Shot record
+tight_layout();display(gcf())</code></pre><p><img src="../figures/plot_example_9_1.png" alt/></p><h2 id="Seismic-greys"><a class="docs-heading-anchor" href="#Seismic-greys">Seismic greys</a><a id="Seismic-greys-1"></a><a class="docs-heading-anchor-permalink" href="#Seismic-greys" title="Permalink"></a></h2><p>We plot here a frequency slice for a seismic dataset and compare a few colormaps for the <code>greys</code> colormap:</p><ul><li>The standard matplotlib <code>gray</code> colormap</li><li>The perceptually accurate <code>greys</code> colormap from colorcet named <code>cet_CET_L1</code></li></ul><pre><code class="language-julia"># Shot record
 figure(figsize=(10, 5))
 subplot(121)
 plot_sdata(shotp; new_fig=false, name=&quot;colorcet gray&quot;, cmap=&quot;cet_CET_L1&quot;)
 subplot(122)
 plot_sdata(shot, (12.5, 0.008); cmap=&quot;gray&quot;, new_fig=false, name=&quot;Greys&quot;)
-tight_layout();display(gcf())</code></pre><pre><code class="language-none">Error: UndefVarError: `shotp` not defined</code></pre><h1 id="Wiggle-traces"><a class="docs-heading-anchor" href="#Wiggle-traces">Wiggle traces</a><a id="Wiggle-traces-1"></a><a class="docs-heading-anchor-permalink" href="#Wiggle-traces" title="Permalink"></a></h1><p>We finally show the traditional wiggle plot for a shot record used in seismic.</p><pre><code class="language-julia"># Wiggle plot
+tight_layout();display(gcf())</code></pre><p><img src="../figures/plot_example_10_1.png" alt/></p><h1 id="Wiggle-traces"><a class="docs-heading-anchor" href="#Wiggle-traces">Wiggle traces</a><a id="Wiggle-traces-1"></a><a class="docs-heading-anchor-permalink" href="#Wiggle-traces" title="Permalink"></a></h1><p>We finally show the traditional wiggle plot for a shot record used in seismic.</p><pre><code class="language-julia"># Wiggle plot
 figure(figsize=(5, 5))
 wiggle_plot(shot[1:5:end, 1:10:end], xloc[1:10:end], 0:0.02:4.6; new_fig=false)
-tight_layout();display(gcf())</code></pre><p><img src="../figures/plot_example_10_1.png" alt/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../README/">« About</a><a class="docs-footer-nextpage" href="../API/">API reference »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 30 May 2023 14:31">Tuesday 30 May 2023</span>. Using Julia version 1.9.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+tight_layout();display(gcf())</code></pre><p><img src="../figures/plot_example_10_1.png" alt/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../README/">« About</a><a class="docs-footer-nextpage" href="../API/">API reference »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 30 May 2023 16:58">Tuesday 30 May 2023</span>. Using Julia version 1.9.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
