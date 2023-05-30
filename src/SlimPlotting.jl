@@ -1,11 +1,25 @@
 module SlimPlotting
 
-using PyPlot, Statistics, ColorSchemes
+using Statistics, ColorSchemes, Reexport
+@reexport using PyPlot
 
 const cc = PyPlot.PyNULL()
-
+scm = Dict()
 
 function __init__()
+    # import seiscm
+    scmp = try
+        PyPlot.pyimport("seiscm")
+    catch e
+        # Installing and loading
+        run(Cmd([PyPlot.PyCall.pyprogramname, "-m", "pip", "install", "-U", "--user", "seiscm"]))
+        PyPlot.pyimport("seiscm")
+    end
+    global scm[:seismic] = scmp.seismic()
+    global scm[:bwr] = scmp.seismic()
+    global scm[:phase] = scmp.phase()
+    global scm[:frequency] = scmp.frequency()
+    # Import colorcet
     try
         copy!(cc, PyPlot.pyimport_conda("colorcet", "colorcet"))
     catch e
@@ -16,7 +30,14 @@ function __init__()
 end
 
 export plot_fslice, plot_velocity, plot_simage, plot_sdata, wiggle_plot
-export colorschemes
+export colorschemes, seiscm
+
+"""
+    seiscm(name)
+
+Return the colormap `name` for seiscm. These colormap are preimported as a dictionnary
+"""
+seiscm(s::Symbol) = scm[s]
 
 """
     _plot_with_units(image, spacing; perc=95, cmap=:cet_CET_L1, 
@@ -70,8 +91,8 @@ function _plot_with_units(image, spacing; perc=95, cmap=:cet_CET_L1, vmax=nothin
     cbar && colorbar(fraction=0.046, pad=0.04)
 
     if ~isnothing(save)
-    save == true ? filename=name : filename=save
-    savefig(filename, bbox_inches="tight", dpi=150)
+        save == true ? filename=name : filename=save
+        savefig(filename, bbox_inches="tight", dpi=150)
     end
 end
 
@@ -107,7 +128,9 @@ function plot_simage(image; kw...)
         @warn "No grid spacing specified, plotting with a 1m grid spacing"
         d = (1, 1)
     end
-    plot_simage(image.data, d; kw...)
+    kwd = Dict(kw)
+    cmap = pop!(kwd, :cmap, scm[:seismic])
+    plot_simage(image.data, d; cmap=cmap, kwd...)
 end
 
 
@@ -207,7 +230,7 @@ function plot_sdata(image; kw...)
         geom = hasproperty(geom, :xloc) ? geom : Geometry(geom)
         geom.dt[1], diff(geom.xloc[1])[1]
     catch
-        nothing
+        nothing, nothing
     end
     if isnothing(dt)
         @warn "No grid spacing specified, plotting with a 1m grid spacing"
@@ -272,19 +295,19 @@ function wiggle_plot(data::Array{Td, 2}, xrec=nothing, time_axis=nothing;
     length(time_axis) == size(data, 1) || error("time_axis must be the same length as the number of rows in data");
     # Time gain
     tg = time_axis .^ t_scale;
-    ax = new_fig ? subplots()[2] : gca()
+    new_fig && figure()
 
-    ax.set_ylim(maximum(time_axis), minimum(time_axis))
-    ax.set_xlim(minimum(xrec), maximum(xrec))
+    ylim(maximum(time_axis), minimum(time_axis))
+    xlim(minimum(xrec), maximum(xrec))
     for (i, xr) ∈ enumerate(xrec)
         x = tg.* data[:, i]
         x = dx[i] * x ./ maximum(x) .+ xr
         # rescale to avoid large spikes
-        ax.plot(x, time_axis, "k-")
-        ax.fill_betweenx(time_axis, xr, x, where=(x.>xr), color="k")
+        plot(x, time_axis, "k-")
+        fill_betweenx(time_axis, xr, x, where=(x.>xr), color="k")
     end
-    ax.set_xlabel("X")
-    ax.set_ylabel("Time")
+    xlabel("X")
+    ylabel("Time")
 end
 
 end # module
