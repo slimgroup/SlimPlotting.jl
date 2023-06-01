@@ -22,7 +22,7 @@ function __init__()
     # import seiscm
     scmp = tryimport("seiscm")
     global scm[:seismic] = scmp.seismic()
-    global scm[:bwr] = scmp.seismic()
+    global scm[:bwr] = scmp.bwr()
     global scm[:phase] = scmp.phase()
     global scm[:frequency] = scmp.frequency()
     # Import colorcet
