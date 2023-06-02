@@ -68,7 +68,7 @@ plot_simage(dm, (10, 20); cmap=:cet_CET_L1, new_fig=false, name="Colorcet Greys"
 tight_layout();display(gcf())
 
 
-#' #  Veclocity
+#' #  Velocity
 #' We plot here a velocity model and compare a few colormaps:
 #' - The `seiscm.frequency` colormap
 #' - The ColorSchemes `vik` colormap
@@ -132,6 +132,21 @@ subplot(121)
 plot_sdata(shotp; new_fig=false, name="colorcet gray", cmap="cet_CET_L1")
 subplot(122)
 plot_sdata(shot, (12.5, 0.008); cmap="gray", new_fig=false, name="Greys")
+tight_layout();display(gcf())
+
+#' #  Compare shot records
+#' One of the main visual representation of FWI inversion is to compare the true shot record with the synthetic data from
+#' the current velocity model. A good way to visualize this difference is to overlay the two shot records alternating the traces
+#' between each shots with a different colormap to check the alignment of the events. We show below how to do this with the 
+#' `compare_shots` function
+
+figure(figsize=(10, 5))
+subplot(131)
+compare_shots(shotp, shotp; new_fig=false, name="Overlap compare")
+subplot(132)
+compare_shots(shotp, shotp; new_fig=false, cmap=("bwr", "RdBu"), name="Overlap compare custom cmap")
+subplot(133)
+compare_shots(shotp, shotp; side_by_side=true, new_fig=false, name="Side by side compare")
 tight_layout();display(gcf())
 
 

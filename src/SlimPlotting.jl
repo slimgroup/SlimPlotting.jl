@@ -29,7 +29,7 @@ function __init__()
     copy!(cc, tryimport("colorcet"))
 end
 
-export plot_fslice, plot_velocity, plot_simage, plot_sdata, wiggle_plot
+export plot_fslice, plot_velocity, plot_simage, plot_sdata, wiggle_plot, compare_shots
 export colorschemes, seiscm
 
 """
@@ -66,7 +66,7 @@ Plot a 2D grided image with physical units defined by the grid spacing `spacing`
 """
 function _plot_with_units(image, spacing; perc=95, cmap=:cet_CET_L1, vmax=nothing,
                           o=(0, 0), interp="hanning", aspect=nothing, d_scale=0,
-                          positive=false, labels=(:X, :Depth), cbar=false,
+                          positive=false, labels=(:X, :Depth), cbar=false, alpha=nothing,
                           units=(:m, :m), name="RTM", new_fig=true, save=nothing)
     nz, nx = size(image)
     dz, dx = spacing
@@ -84,7 +84,11 @@ function _plot_with_units(image, spacing; perc=95, cmap=:cet_CET_L1, vmax=nothin
     cmap = try ColorMap(cmap); catch; ColorMap(colorschemes[cmap].colors); end
     new_fig && figure()
     # Plot
-    imshow(scaled, vmin=ma, vmax=a, cmap=cmap, aspect=aspect, interpolation=interp, extent=extent)
+    if !isnothing(alpha)
+        imshow(scaled, vmin=ma, vmax=a, cmap=cmap, aspect=aspect, interpolation=interp, extent=extent, alpha=alpha)
+    else
+        imshow(scaled, vmin=ma, vmax=a, cmap=cmap, aspect=aspect, interpolation=interp, extent=extent)
+    end
     xlabel("$(labels[1]) [$(units[1])]")
     ylabel("$(labels[2]) [$(units[2])]")
     title("$name")
@@ -137,7 +141,7 @@ end
 """
     plot_fslice(image, spacing; perc=98, cmap=:diverging_bwr_20_95_c54_n256,
                 o=(0, 0), interp="hanning", aspect=nothing, d_scale=1.5,
-                name="RTM", units="m", new_fig=true, save=nothing)
+                name="Frequency slice", units="m", new_fig=true, save=nothing)
 
 Plot a 2D frequency slice of seismic data. Calls [`_plot_with_units`](@ref).
 
@@ -169,7 +173,7 @@ plot_fslice(image::AbstractArray{T}, args...; kw...) where {T<:Complex} = plot_f
 """
     plot_velocity(image, spacing; perc=98, cmap=:cet_rainbow,
                 o=(0, 0), interp="hanning", aspect=nothing, d_scale=1.5,
-                name="RTM", units="m", new_fig=true, save=nothing)
+                name="Velocity", units="m", new_fig=true, save=nothing)
 
 Plot a velocity model. Calls [`_plot_with_units`](@ref).
 
@@ -203,7 +207,7 @@ end
 """
     plot_sdata(image, spacing; perc=98, cmap=:linear_grey_10_95_c0_n256,
                 o=(0, 0), interp="hanning", aspect=nothing, d_scale=1.5,
-                name="RTM", units="m", new_fig=true, save=nothing)
+                name="Shot", units="m", new_fig=true, save=nothing)
 
 Plot seismic data gather (i.e shot record). Calls [`_plot_with_units`](@ref).
 
@@ -240,6 +244,85 @@ function plot_sdata(image; kw...)
     end
     shot = hasproperty(image, :data) ? image.data[1] : image
     plot_sdata(shot, d; kw...)
+end
+
+
+"""
+    compare_shots(image1, image2, spacing; perc=98, cmap=:linear_grey_10_95_c0_n256,
+                  o=(0, 0), interp="hanning", aspect=nothing, d_scale=1.5, side_by_side=false,
+                  chunksize=20, name="Data match", units="m", new_fig=true, save=nothing)
+
+
+Compares the two shot records image1 and image2. This plotting utility supports two modes: `side_by_side` that plot the shot records next two each other with the second one having its traces reversed
+, and `overlap` (default) where the two shots are overlapped selecting `chunksize` (Default 20) traces from each shot alternatively.
+
+# Arguments
+- `image1::Array{T, 2}`: First image
+- `image2::Array{T, 2}`: Second image to comapre against the first image
+- `spacing::Tuple`: grid spacing in physical units
+- `perc::Int`: (Optional) Clipping percentile, default=95
+- `cmap::Symbol`: (Optional) Color map, default=:linear_grey_10_95_c0_n256. Can provide a tuple of colormap for the `overlap` mode
+- `o::Tuple`: (Optional) Origin of the image, default=(0, 0)
+- `interp::String`: (Optional) Interpolation method, default="hanning"
+- `aspect::Symbol`: (Optional) Aspect ratio, default=:auto
+- `d_scale::Float`: (Optional) Depth scaling, default=1.5. Applied scaling is `(1:max_depth).^d_scale`.
+- `labels::Tuple`: (Optional) Labels for the axes, default=(:X, :Depth)
+- `name::String`: (Optional) Figure title, default="RTM"
+- `units::Tuple(String)`: (Optional) Physical units of each axis, default=(:m, :m).
+- `new_fig::Bool`: (Optional) Create a new figure, default=true
+- `save::String`: (Optional) Save figure to file, default=nothing doesn't save the figure
+- `cbar::Bool`: (Optional) Show colorbar, default=false
+- `chunksize::Integer`: Numberof trace in the chunk for the overlap comparison
+- `side_by_side::Bool`: Whether to plot a side-by-side (true) or overlap (false, default) comaprison
+
+"""
+function compare_shots(image, image2, spacing; chunksize=20, kw...)
+    kwd = Dict(kw)
+    if pop!(kwd, :side_by_side, false)
+        plot_sdata(hcat(image, zeros(size(image, 1), 5), image2[:, end:-1:1]), spacing; kwd...)
+        return
+    end
+    # Get colormap
+    cmap1 = pop!(kwd, :cmap, :cet_CET_L1)
+    if isa(cmap1, Tuple)
+        cmap1, cmap2 = cmap1
+    else
+        cmap2 = pop!(kwd, :cmap, :cet_CET_D1A)
+        if cmap2 == cmap1
+            cmap2 = ColorMap(cmap1).reversed()
+        end
+    end
+    # Zero out to alternate
+    nrec = size(image, 2)
+    inds1 = vcat(collect(i:min(nrec, i+chunksize-1) for i in range(1, nrec, step=2*chunksize))...)
+    inds2 = vcat(collect(i:min(nrec, i+chunksize-1) for i in range(chunksize+1, nrec, step=2*chunksize))...)
+    @show inds1, inds2
+    shot1 = zeros(size(image))
+    shot1[:, inds1] .= image[:, inds1]
+    shot2 = zeros(size(image2))
+    shot2[:, inds2] .= image2[:, inds2]
+    plot_sdata(shot1, spacing; cmap=cmap1, kwd...)
+    pop!(kwd, :new_fig, false)
+    plot_sdata(shot2, spacing; cmap=cmap2, new_fig=false, alpha=.25, kwd...)
+end
+
+function compare_shots(image, image2; kw...)
+    dt, dx = try 
+        geom = try image.geometry; catch nothing; end
+        geom = hasproperty(geom, :xloc) ? geom : Geometry(geom)
+        geom.dt[1], diff(geom.xloc[1])[1]
+    catch
+        nothing, nothing
+    end
+    if isnothing(dt)
+        @warn "No grid spacing specified, plotting with a 1m grid spacing"
+        d = (1, 1)
+    else
+        d = (dt, dx)
+    end
+    shot1 = hasproperty(image, :data) ? image.data[1] : image
+    shot2 = hasproperty(image2, :data) ? image2.data[1] : image2
+    compare_shots(shot1, shot2, d; kw...)
 end
 
 
