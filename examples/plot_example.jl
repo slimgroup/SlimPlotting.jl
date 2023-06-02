@@ -155,7 +155,7 @@ tight_layout();display(gcf())
 
 # Wiggle plot
 
-figure(figsize=(5, 5))
-subplot(111)
-wiggle_plot(shot[1:5:end, 1:10:end], xloc[1:10:end], 0:0.02:4.6; new_fig=false)
-tight_layout();display(gcf())
+# figure(figsize=(5, 5))
+# subplot(111)
+# wiggle_plot(shot[1:5:end, 1:10:end], xloc[1:10:end], 0:0.02:4.6; new_fig=false)
+# tight_layout();display(gcf())
