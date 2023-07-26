@@ -22,6 +22,7 @@ function tryimport(pkg::String)
     return pyi
 end
 
+
 function __init__()
     # import seiscm
     scmp = tryimport("seiscm")
@@ -68,39 +69,75 @@ Plot a 2D grided image with physical units defined by the grid spacing `spacing`
   - `save::String`: (Optional) Save figure to file, default=nothing doesn't save the figure
   - `cbar::Bool`: (Optional) Show colorbar, default=false
 """
-function _plot_with_units(image, spacing; perc=95, cmap=:cet_CET_L1, vmax=nothing,
-                          o=(0, 0), interp="hanning", aspect=nothing, d_scale=0,
-                          positive=false, labels=(:X, :Depth), cbar=false, alpha=nothing,
-                          units=(:m, :m), name="RTM", new_fig=true, save=nothing)
+function _plot_with_units(
+    image,
+    spacing;
+    perc = 95,
+    cmap = :cet_CET_L1,
+    vmax = nothing,
+    o = (0, 0),
+    interp = "hanning",
+    aspect = nothing,
+    d_scale = 0,
+    positive = false,
+    labels = (:X, :Depth),
+    cbar = false,
+    alpha = nothing,
+    units = (:m, :m),
+    name = "RTM",
+    new_fig = true,
+    save = nothing,
+)
     nz, nx = size(image)
     dz, dx = spacing
     oz, ox = o
-    depth = range(oz, oz + (nz - 1)*spacing[2], length=nz).^d_scale
+    depth = range(oz, oz + (nz - 1) * spacing[2], length = nz) .^ d_scale
     scaled = image .* depth
 
-    a = positive ? maximum(scaled) : quantile(abs.(vec(scaled)), perc/100)
+    a = positive ? maximum(scaled) : quantile(abs.(vec(scaled)), perc / 100)
     isnothing(vmax) || (a = vmax)
     ma = positive ? minimum(scaled) : -a
-    extent = [ox, ox+ (nx-1)*dx, oz+(nz-1)*dz, oz]
+    extent = [ox, ox + (nx - 1) * dx, oz + (nz - 1) * dz, oz]
     isnothing(aspect) && (aspect = :auto)
 
     # color map
-    cmap = try ColorMap(cmap); catch; ColorMap(colorschemes[cmap].colors); end
+    cmap = try
+        ColorMap(cmap)
+    catch
+        ColorMap(colorschemes[cmap].colors)
+    end
     new_fig && figure()
     # Plot
     if !isnothing(alpha)
-        imshow(scaled, vmin=ma, vmax=a, cmap=cmap, aspect=aspect, interpolation=interp, extent=extent, alpha=alpha)
+        imshow(
+            scaled,
+            vmin = ma,
+            vmax = a,
+            cmap = cmap,
+            aspect = aspect,
+            interpolation = interp,
+            extent = extent,
+            alpha = alpha,
+        )
     else
-        imshow(scaled, vmin=ma, vmax=a, cmap=cmap, aspect=aspect, interpolation=interp, extent=extent)
+        imshow(
+            scaled,
+            vmin = ma,
+            vmax = a,
+            cmap = cmap,
+            aspect = aspect,
+            interpolation = interp,
+            extent = extent,
+        )
     end
     xlabel("$(labels[1]) [$(units[1])]")
     ylabel("$(labels[2]) [$(units[2])]")
     title("$name")
-    cbar && colorbar(fraction=0.046, pad=0.04)
+    cbar && colorbar(fraction = 0.046, pad = 0.04)
 
     if ~isnothing(save)
-        save == true ? filename=name : filename=save
-        savefig(filename, bbox_inches="tight", dpi=150)
+        save == true ? filename = name : filename = save
+        savefig(filename, bbox_inches = "tight", dpi = 150)
     end
 end
 
@@ -131,14 +168,17 @@ Plot a 2D seismic image with a grid spacing `spacing`. Calls [`_plot_with_units`
 
 """
 function plot_simage(image; kw...)
-    d = try image.d; catch nothing; end
+    d = try
+        image.d
+    catch nothing
+    end
     if isnothing(d)
         @warn "No grid spacing specified, plotting with a 1m grid spacing"
         d = (1, 1)
     end
     kwd = Dict(kw)
     cmap = pop!(kwd, :cmap, scm[:seismic])
-    plot_simage(image.data, d; cmap=cmap, kwd...)
+    plot_simage(image.data, d; cmap = cmap, kwd...)
 end
 
 
@@ -172,7 +212,8 @@ function plot_fslice(image; kw...)
     plot_fslice(image.data, d; kw...)
 end
 
-plot_fslice(image::AbstractArray{T}, args...; kw...) where {T<:Complex} = plot_fslice(real.(image), args...; kw...)
+plot_fslice(image::AbstractArray{T}, args...; kw...) where {T<:Complex} =
+    plot_fslice(real.(image), args...; kw...)
 
 """
     plot_velocity(image, spacing; perc=98, cmap=:cet_rainbow,
@@ -199,7 +240,10 @@ Plot a velocity model. Calls [`_plot_with_units`](@ref).
 
 """
 function plot_velocity(image; kw...)
-    d = try image.d; catch nothing; end
+    d = try
+        image.d
+    catch nothing
+    end
     if isnothing(d)
         @warn "No grid spacing specified, plotting with a 1m grid spacing"
         d = (1, 1)
@@ -233,8 +277,11 @@ Plot seismic data gather (i.e shot record). Calls [`_plot_with_units`](@ref).
 
 """
 function plot_sdata(image; kw...)
-    dt, dx = try 
-        geom = try image.geometry; catch nothing; end
+    dt, dx = try
+        geom = try
+            image.geometry
+        catch nothing
+        end
         geom = hasproperty(geom, :xloc) ? geom : Geometry(geom)
         geom.dt[1], diff(geom.xloc[1])[1]
     catch
@@ -280,10 +327,14 @@ Compares the two shot records image1 and image2. This plotting utility supports 
 - `side_by_side::Bool`: Whether to plot a side-by-side (true) or overlap (false, default) comaprison
 
 """
-function compare_shots(image, image2, spacing; chunksize=20, kw...)
+function compare_shots(image, image2, spacing; chunksize = 20, kw...)
     kwd = Dict(kw)
     if pop!(kwd, :side_by_side, false)
-        plot_sdata(hcat(image, zeros(size(image, 1), 5), image2[:, end:-1:1]), spacing; kwd...)
+        plot_sdata(
+            hcat(image, zeros(size(image, 1), 5), image2[:, end:-1:1]),
+            spacing;
+            kwd...,
+        )
         return
     end
     # Get colormap
@@ -298,20 +349,32 @@ function compare_shots(image, image2, spacing; chunksize=20, kw...)
     end
     # Zero out to alternate
     nrec = size(image, 2)
-    inds1 = vcat(collect(i:min(nrec, i+chunksize-1) for i in range(1, nrec, step=2*chunksize))...)
-    inds2 = vcat(collect(i:min(nrec, i+chunksize-1) for i in range(chunksize+1, nrec, step=2*chunksize))...)
+    inds1 = vcat(
+        collect(
+            i:min(nrec, i + chunksize - 1) for i in range(1, nrec, step = 2 * chunksize)
+        )...,
+    )
+    inds2 = vcat(
+        collect(
+            i:min(nrec, i + chunksize - 1) for
+            i in range(chunksize + 1, nrec, step = 2 * chunksize)
+        )...,
+    )
     shot1 = zeros(size(image))
     shot1[:, inds1] .= image[:, inds1]
     shot2 = zeros(size(image2))
     shot2[:, inds2] .= image2[:, inds2]
-    plot_sdata(shot1, spacing; cmap=cmap1, kwd...)
+    plot_sdata(shot1, spacing; cmap = cmap1, kwd...)
     pop!(kwd, :new_fig, false)
-    plot_sdata(shot2, spacing; cmap=cmap2, new_fig=false, alpha=.25, kwd...)
+    plot_sdata(shot2, spacing; cmap = cmap2, new_fig = false, alpha = 0.25, kwd...)
 end
 
 function compare_shots(image, image2; kw...)
-    dt, dx = try 
-        geom = try image.geometry; catch nothing; end
+    dt, dx = try
+        geom = try
+            image.geometry
+        catch nothing
+        end
         geom = hasproperty(geom, :xloc) ? geom : Geometry(geom)
         geom.dt[1], diff(geom.xloc[1])[1]
     catch
@@ -336,7 +399,7 @@ _names = ["RTM", "Frequency slice", "Velocity", "Shot record"]
 _units = [(:m, :m), (:m, :m), (:m, :m), (:m, :s)]
 _labels = [(:X, :Depth), (:Xsrc, :Xrec), (:X, :Depth), (:Xrec, :T)]
 
-for (func, cmap, pname, u ,l) ∈ zip(_funcs, _default_colors, _names, _units, _labels)
+for (func, cmap, pname, u, l) ∈ zip(_funcs, _default_colors, _names, _units, _labels)
     @eval begin
         function $func(image, spacing; kw...)
             kwd = Dict(kw)
@@ -345,7 +408,16 @@ for (func, cmap, pname, u ,l) ∈ zip(_funcs, _default_colors, _names, _units, _
             u = pop!(kwd, :units, $(Meta.quot(u)))
             l = pop!(kwd, :labels, $(Meta.quot(l)))
             positive = $func == plot_velocity
-            _plot_with_units(image, spacing; kwd..., positive=positive, cmap=cmap, name=pname, units=u, labels=l)
+            _plot_with_units(
+                image,
+                spacing;
+                kwd...,
+                positive = positive,
+                cmap = cmap,
+                name = pname,
+                units = u,
+                labels = l,
+            )
         end
     end
 end
@@ -364,33 +436,41 @@ wiggle_plot of a seismic traces.
   - `t_scale::Float`: (Optional) Time scaling, default=1.5. Applied scaling is `(1:max_time).^t_scale`.
   - `new_fig::Bool`: (Optional) Create a new figure, default=true
 """
-function wiggle_plot(data::Array{Td, 2}, xrec=nothing, time_axis=nothing;
-                     t_scale=1.5, new_fig=true) where Td
+function wiggle_plot(
+    data::Array{Td,2},
+    xrec = nothing,
+    time_axis = nothing;
+    t_scale = 1.5,
+    new_fig = true,
+) where {Td}
     # X axis
     if isnothing(xrec)
         @info "No X coordinates prvided, using 1:ntrace"
-        xrec = range(0, size(data, 2), length=size(data, 2))
+        xrec = range(0, size(data, 2), length = size(data, 2))
     end
-    length(xrec) == size(data, 2) || error("xrec must be the same length as the number of columns in data");
-    dx = diff(xrec); dx = 2 .* vcat(dx[1], dx)
+    length(xrec) == size(data, 2) ||
+        error("xrec must be the same length as the number of columns in data")
+    dx = diff(xrec)
+    dx = 2 .* vcat(dx[1], dx)
     # time axis
     if isnothing(time_axis)
         @info "No time axis provided, using 1:ntime"
-        time_axis = range(0, size(data, 1), length=size(data, 1))
+        time_axis = range(0, size(data, 1), length = size(data, 1))
     end
-    length(time_axis) == size(data, 1) || error("time_axis must be the same length as the number of rows in data");
+    length(time_axis) == size(data, 1) ||
+        error("time_axis must be the same length as the number of rows in data")
     # Time gain
-    tg = time_axis .^ t_scale;
+    tg = time_axis .^ t_scale
     new_fig && figure()
 
     ylim(maximum(time_axis), minimum(time_axis))
     xlim(minimum(xrec), maximum(xrec))
     for (i, xr) ∈ enumerate(xrec)
-        x = tg.* data[:, i]
+        x = tg .* data[:, i]
         x = dx[i] * x ./ maximum(x) .+ xr
         # rescale to avoid large spikes
         plot(x, time_axis, "k-")
-        fill_betweenx(time_axis, xr, x, where=(x.>xr), color="k")
+        fill_betweenx(time_axis, xr, x, where = (x .> xr), color = "k")
     end
     xlabel("X")
     ylabel("Time")
