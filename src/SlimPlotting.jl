@@ -15,7 +15,7 @@ function tryimport(pkg::String)
             PyPlot.PyCall.Conda.pip_interop(true)
             PyPlot.PyCall.Conda.pip("install", pkg)
         else
-            run(PyPlot.PyCall.python_cmd(`-m pip install seiscm`))
+            run(PyPlot.PyCall.python_cmd(`-m pip install --user $(pkg)`))
         end
         PyPlot.pyimport(pkg)
     end
