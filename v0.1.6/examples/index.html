@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Examples · Slim Plotting toolbox</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">Slim Plotting toolbox</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../README/">About</a></li><li class="is-active"><a class="tocitem" href>Examples</a><ul class="internal"><li class="toplevel"><a class="tocitem" href="#Import-SlimPlotting,-SegyIO-to-read-seismic-data,-JLD2-for-hdf5-like-files"><span>Import SlimPlotting, SegyIO to read seismic data, JLD2 for hdf5-like files</span></a></li><li class="toplevel"><a class="tocitem" href="#Initialize-all-needed-data"><span>Initialize all needed data</span></a></li><li class="toplevel"><a class="tocitem" href="#Create-structures-to-mimic-JUDI-like-inputs"><span>Create structures to mimic JUDI-like inputs</span></a></li><li class="toplevel"><a class="tocitem" href="#Model-perturbation"><span>Model perturbation</span></a></li><li class="toplevel"><a class="tocitem" href="#Velocity"><span>Velocity</span></a></li><li class="toplevel"><a class="tocitem" href="#Frequency-slice"><span>Frequency slice</span></a></li><li class="toplevel"><a class="tocitem" href="#Shot-record"><span>Shot record</span></a></li><li><a class="tocitem" href="#Seismic-blue-white-red"><span>Seismic blue-white-red</span></a></li><li><a class="tocitem" href="#Seismic-greys"><span>Seismic greys</span></a></li><li class="toplevel"><a class="tocitem" href="#Compare-shot-records"><span>Compare shot records</span></a></li><li class="toplevel"><a class="tocitem" href="#Wiggle-traces"><span>Wiggle traces</span></a></li></ul></li><li><a class="tocitem" href="../API/">API reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Examples</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Examples</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/slimgroup/SlimPlotting.jl/blob/master/docs/src/examples.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Plotting-data-and-models-with-SlimPlotting"><a class="docs-heading-anchor" href="#Plotting-data-and-models-with-SlimPlotting">Plotting data and models with SlimPlotting</a><a id="Plotting-data-and-models-with-SlimPlotting-1"></a><a class="docs-heading-anchor-permalink" href="#Plotting-data-and-models-with-SlimPlotting" title="Permalink"></a></h1><hr/><p>title: Overview of SlimPlotting utilities author: Mathias Louboutin date: April 2023 –-</p><p>This example script is written using <a href="https://github.com/JunoLab/Weave.jl">Weave.jl</a> and can be converted to different format for documentation and usage This example is converted to a markdown file for the documentation.</p><h1 id="Import-SlimPlotting,-SegyIO-to-read-seismic-data,-JLD2-for-hdf5-like-files"><a class="docs-heading-anchor" href="#Import-SlimPlotting,-SegyIO-to-read-seismic-data,-JLD2-for-hdf5-like-files">Import SlimPlotting, SegyIO to read seismic data, JLD2 for hdf5-like files</a><a id="Import-SlimPlotting,-SegyIO-to-read-seismic-data,-JLD2-for-hdf5-like-files-1"></a><a class="docs-heading-anchor-permalink" href="#Import-SlimPlotting,-SegyIO-to-read-seismic-data,-JLD2-for-hdf5-like-files" title="Permalink"></a></h1><pre><code class="language-julia">using SlimPlotting, SegyIO, JLD2</code></pre><h1 id="Initialize-all-needed-data"><a class="docs-heading-anchor" href="#Initialize-all-needed-data">Initialize all needed data</a><a id="Initialize-all-needed-data-1"></a><a class="docs-heading-anchor-permalink" href="#Initialize-all-needed-data" title="Permalink"></a></h1><p>Close all figures if any existing</p><pre><code class="language-julia">SlimPlotting.PyPlot.close(:all)</code></pre><p>Path to the files and data used for these examples</p><pre><code class="language-julia">data_path = dirname(pathof(SlimPlotting)) * &quot;/../data/&quot;;</code></pre><p>Read the data</p><pre><code class="language-julia"># Pure array
+vp = Float32.(segy_read(&quot;$(data_path)2dVP.sgy&quot;).data);
+dm = diff(vp, dims = 1);
+shot = Float32.(segy_read(&quot;$(data_path)2dshot.segy&quot;).data);
+xloc = get_header(segy_read(&quot;$(data_path)2dshot.segy&quot;), &quot;GroupX&quot;)
+fslice = JLD2.load(&quot;$(data_path)2dfslice.jld&quot;);</code></pre><h1 id="Create-structures-to-mimic-JUDI-like-inputs"><a class="docs-heading-anchor" href="#Create-structures-to-mimic-JUDI-like-inputs">Create structures to mimic JUDI-like inputs</a><a id="Create-structures-to-mimic-JUDI-like-inputs-1"></a><a class="docs-heading-anchor-permalink" href="#Create-structures-to-mimic-JUDI-like-inputs" title="Permalink"></a></h1><p>In the future this should be instead converted into an extension rather than implicit knowledge of the structure</p><pre><code class="language-julia"># Dummy structures to check plot with metadata
+struct geometry
+    xloc::Any
+end
+
+struct shotrec
+    data::Any
+    dt::Any
+    geometry::Any
+end
+
+struct Phys
+    data::Any
+    d::Any
+end
+
+## Make physical objects
+dmp = Phys(dm, (10, 20))
+vpp = Phys(vp, (10, 20))
+fslicep = Phys(fslice[&quot;Freq&quot;][1, :, :], (12.5, 12.5))
+shotp = shotrec([shot], 0.008, geometry([xloc]));</code></pre><h1 id="Model-perturbation"><a class="docs-heading-anchor" href="#Model-perturbation">Model perturbation</a><a id="Model-perturbation-1"></a><a class="docs-heading-anchor-permalink" href="#Model-perturbation" title="Permalink"></a></h1><p>We plot here a model perturbation (i.e a Reverse-time Migrated image) and compare a few colormaps:</p><ul><li>The <code>seiscm.seimic</code> colormap</li><li>The standard matplotlib <code>Greys</code> colormap</li><li>The perceptually accurate <code>Greys</code> colormap from colorcet</li></ul><pre><code class="language-julia">figure(figsize = (10, 10))
+subplot(311)
+plot_simage(dmp; new_fig = false, name = &quot;Seismic&quot;)
+subplot(312)
+plot_simage(dm, (10, 20); cmap = &quot;Greys&quot;, new_fig = false, name = &quot;Greys&quot;)
+subplot(313)
+plot_simage(dm, (10, 20); cmap = :cet_CET_L1, new_fig = false, name = &quot;Colorcet Greys&quot;)
+tight_layout();
+display(gcf());</code></pre><p><img src="../figures/plot_example_6_1.png" alt/></p><h1 id="Velocity"><a class="docs-heading-anchor" href="#Velocity">Velocity</a><a id="Velocity-1"></a><a class="docs-heading-anchor-permalink" href="#Velocity" title="Permalink"></a></h1><p>We plot here a velocity model and compare a few colormaps:</p><ul><li>The <code>seiscm.frequency</code> colormap</li><li>The ColorSchemes <code>vik</code> colormap</li><li>The perceptually accurate <code>jet</code> colormap from colorcet named <code>cet_rainbow4</code></li></ul><pre><code class="language-julia">figure(figsize = (10, 10))
+subplot(311)
+plot_velocity(vpp; new_fig = false, name = &quot;colorcet jet&quot;, cmap = &quot;cet_rainbow4&quot;)
+subplot(312)
+plot_velocity(vp, (10, 20); cmap = :vik, new_fig = false, name = &quot;ColorSchemes&#39;s vik&quot;)
+subplot(313)
+plot_velocity(vp, (10, 20); cmap = seiscm(:frequency), new_fig = false, name = &quot;Seiscm&quot;)
+tight_layout();
+display(gcf());</code></pre><p><img src="../figures/plot_example_7_1.png" alt/></p><h1 id="Frequency-slice"><a class="docs-heading-anchor" href="#Frequency-slice">Frequency slice</a><a id="Frequency-slice-1"></a><a class="docs-heading-anchor-permalink" href="#Frequency-slice" title="Permalink"></a></h1><p>We plot here a frequency slice for a seismic dataset and compare a few colormaps:</p><ul><li>The <code>seiscm.bwr</code> colormap</li><li>The standard matplotlib <code>bwr</code> colormap</li><li>The perceptually accurate <code>bwr</code> colormap from colorcet named <code>cet_CET_D1A</code></li></ul><pre><code class="language-julia"># Frequency slice
+figure(figsize = (10, 5))
+subplot(131)
+plot_fslice(fslice[&quot;Freq&quot;][1, :, :], (12.5, 12.5); new_fig = false, name = &quot;colorcet bwr&quot;)
+subplot(132)
+plot_fslice(fslicep; cmap = :bwr, new_fig = false, name = &quot;bwr&quot;)
+subplot(133)
+plot_fslice(fslicep; cmap = seiscm(:bwr), new_fig = false, name = &quot;Seiscm bwr&quot;)
+tight_layout();
+display(gcf());</code></pre><p><img src="../figures/plot_example_8_1.png" alt/></p><h1 id="Shot-record"><a class="docs-heading-anchor" href="#Shot-record">Shot record</a><a id="Shot-record-1"></a><a class="docs-heading-anchor-permalink" href="#Shot-record" title="Permalink"></a></h1><h2 id="Seismic-blue-white-red"><a class="docs-heading-anchor" href="#Seismic-blue-white-red">Seismic blue-white-red</a><a id="Seismic-blue-white-red-1"></a><a class="docs-heading-anchor-permalink" href="#Seismic-blue-white-red" title="Permalink"></a></h2><p>We plot here a frequency slice for a seismic dataset and compare a few colormaps for the <code>bwr</code> colormap:</p><ul><li>The <code>seiscm.bwr</code> colormap</li><li>The standard matplotlib <code>bwr</code> colormap</li><li>The perceptually accurate <code>bwr</code> colormap from colorcet named <code>cet_CET_D1A</code></li></ul><pre><code class="language-julia"># Shot record
+figure(figsize = (10, 5))
+subplot(131)
+plot_sdata(shotp; new_fig = false, name = &quot;matplotlib seismic&quot;, cmap = &quot;bwr&quot;)
+subplot(132)
+plot_sdata(shot, (12.5, 0.008); cmap = :cet_CET_D1A, new_fig = false, name = &quot;Colorcet bwr&quot;)
+subplot(133)
+plot_sdata(shot, (12.5, 0.008); cmap = seiscm(:bwr), new_fig = false, name = &quot;Seismic bwr&quot;)
+tight_layout();
+display(gcf());</code></pre><p><img src="../figures/plot_example_9_1.png" alt/></p><h2 id="Seismic-greys"><a class="docs-heading-anchor" href="#Seismic-greys">Seismic greys</a><a id="Seismic-greys-1"></a><a class="docs-heading-anchor-permalink" href="#Seismic-greys" title="Permalink"></a></h2><p>We plot here a frequency slice for a seismic dataset and compare a few colormaps for the <code>greys</code> colormap:</p><ul><li>The standard matplotlib <code>gray</code> colormap</li><li>The perceptually accurate <code>greys</code> colormap from colorcet named <code>cet_CET_L1</code></li></ul><pre><code class="language-julia"># Shot record
+figure(figsize = (10, 5))
+subplot(121)
+plot_sdata(shotp; new_fig = false, name = &quot;colorcet gray&quot;, cmap = &quot;cet_CET_L1&quot;)
+subplot(122)
+plot_sdata(shot, (12.5, 0.008); cmap = &quot;gray&quot;, new_fig = false, name = &quot;Greys&quot;)
+tight_layout();
+display(gcf());</code></pre><p><img src="../figures/plot_example_10_1.png" alt/></p><h1 id="Compare-shot-records"><a class="docs-heading-anchor" href="#Compare-shot-records">Compare shot records</a><a id="Compare-shot-records-1"></a><a class="docs-heading-anchor-permalink" href="#Compare-shot-records" title="Permalink"></a></h1><p>One of the main visual representation of FWI inversion is to compare the true shot record with the synthetic data from the current velocity model. A good way to visualize this difference is to overlay the two shot records alternating the traces between each shots with a different colormap to check the alignment of the events. We show below how to do this with the  <code>compare_shots</code> function</p><pre><code class="language-julia">figure(figsize = (10, 5))
+subplot(131)
+compare_shots(shotp, shotp; new_fig = false, name = &quot;Overlap compare&quot;)
+subplot(132)
+compare_shots(
+    shotp,
+    shotp;
+    new_fig = false,
+    cmap = (&quot;bwr&quot;, &quot;RdBu&quot;),
+    name = &quot;Overlap compare custom cmap&quot;,
+)
+subplot(133)
+compare_shots(
+    shotp,
+    shotp;
+    side_by_side = true,
+    new_fig = false,
+    name = &quot;Side by side compare&quot;,
+)
+tight_layout();
+display(gcf());</code></pre><p><img src="../figures/plot_example_11_1.png" alt/></p><h1 id="Wiggle-traces"><a class="docs-heading-anchor" href="#Wiggle-traces">Wiggle traces</a><a id="Wiggle-traces-1"></a><a class="docs-heading-anchor-permalink" href="#Wiggle-traces" title="Permalink"></a></h1><p>We finally show the traditional wiggle plot for a shot record used in seismic.</p><pre><code class="language-julia"># Wiggle plot
+
+# figure(figsize=(5, 5))
+# subplot(111)
+# wiggle_plot(shot[1:5:end, 1:10:end], xloc[1:10:end], 0:0.02:4.6; new_fig=false)
+# tight_layout();display(gcf())</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../README/">« About</a><a class="docs-footer-nextpage" href="../API/">API reference »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Thursday 31 August 2023 21:19">Thursday 31 August 2023</span>. Using Julia version 1.9.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
