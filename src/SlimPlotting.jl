@@ -11,9 +11,13 @@ function tryimport(pkg::String)
     pyi = try
         PythonPlot.pyimport(pkg)
     catch e
-        pyexe = PythonPlot.PythonCall.python_executable_path()
-        run(Cmd(`$(pyexe) -m pip install --user $(pkg)`))
-        PythonPlot.PythonCall.pyimport(pkg)
+        if get(ENV, "JULIA_CONDAPKG_BACKEND", "conda") == "Null"
+            pyexe = PythonPlot.python_executable_path()
+            run(Cmd(`$(pyexe) -m pip install --user $(pkg)`))
+        else
+            PythonPlot.PythonCall.C.CondaPkg.add_pip(pkg)
+        end
+        PythonPlot.pyimport(pkg)
     end
     return pyi
 end
