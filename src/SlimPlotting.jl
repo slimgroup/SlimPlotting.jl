@@ -1,23 +1,19 @@
 module SlimPlotting
 
 using Statistics, ColorSchemes, Reexport
-@reexport using PyPlot
+@reexport using PythonPlot
 
-const cc = PyPlot.PyNULL()
+const cc = PythonPlot.PythonCall.pynew()
 scm = Dict()
 
 
 function tryimport(pkg::String)
     pyi = try
-        PyPlot.pyimport(pkg)
+        PythonPlot.pyimport(pkg)
     catch e
-        if PyPlot.PyCall.conda
-            PyPlot.PyCall.Conda.pip_interop(true)
-            PyPlot.PyCall.Conda.pip("install", pkg)
-        else
-            run(PyPlot.PyCall.python_cmd(`-m pip install --user $(pkg)`))
-        end
-        PyPlot.pyimport(pkg)
+        pyexe = PythonPlot.PythonCall.python_executable_path()
+        run(Cmd(`$(pyexe) -m pip install --user $(pkg)`))
+        PythonPlot.PythonCall.pyimport(pkg)
     end
     return pyi
 end
@@ -26,23 +22,31 @@ end
 function __init__()
     # import seiscm
     scmp = tryimport("seiscm")
-    global scm[:seismic] = scmp.seismic()
-    global scm[:bwr] = scmp.bwr()
-    global scm[:phase] = scmp.phase()
-    global scm[:frequency] = scmp.frequency()
+    global scm["seismic"] = scmp.seismic()
+    global scm["bwr"] = scmp.bwr()
+    global scm["phase"] = scmp.phase()
+    global scm["frequency"] = scmp.frequency()
     # Import colorcet
-    copy!(cc, tryimport("colorcet"))
+    PythonPlot.PythonCall.pycopy!(cc, tryimport("colorcet"))
 end
 
 export plot_fslice, plot_velocity, plot_simage, plot_sdata, wiggle_plot, compare_shots
 export colorschemes, seiscm
+
+# String conversion in case of legacy :symbol input for PyPlot
+to_string(x::Symbol) = string(x)
+to_string(x) = x
+to_symbol(x::String) = Symbol(x)
+to_symbol(x) = x
+
 
 """
     seiscm(name)
 
 Return the colormap `name` for seiscm. These colormap are preimported as a dictionnary
 """
-seiscm(s::Symbol) = scm[s]
+seiscm(s::Symbol) = scm[to_string(s)]
+seiscm(s::String) = scm[s]
 
 """
     _plot_with_units(image, spacing; perc=95, cmap=:cet_CET_L1, 
@@ -102,9 +106,9 @@ function _plot_with_units(
 
     # color map
     cmap = try
-        ColorMap(cmap)
+        ColorMap(to_string(cmap))
     catch
-        ColorMap(colorschemes[cmap].colors)
+        ColorMap(colorschemes[to_symbol(cmap)].colors)
     end
     new_fig && figure()
     # Plot
@@ -113,8 +117,8 @@ function _plot_with_units(
             scaled,
             vmin = ma,
             vmax = a,
-            cmap = cmap,
-            aspect = aspect,
+            cmap = to_string(cmap),
+            aspect = to_string(aspect),
             interpolation = interp,
             extent = extent,
             alpha = alpha,
@@ -124,8 +128,8 @@ function _plot_with_units(
             scaled,
             vmin = ma,
             vmax = a,
-            cmap = cmap,
-            aspect = aspect,
+            cmap = to_string(cmap),
+            aspect = to_string(aspect),
             interpolation = interp,
             extent = extent,
         )
@@ -177,7 +181,7 @@ function plot_simage(image; kw...)
         d = (1, 1)
     end
     kwd = Dict(kw)
-    cmap = pop!(kwd, :cmap, scm[:seismic])
+    cmap = pop!(kwd, :cmap, seiscm(:seismic))
     plot_simage(image.data, d; cmap = cmap, kwd...)
 end
 

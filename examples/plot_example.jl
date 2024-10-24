@@ -14,7 +14,7 @@ using SlimPlotting, SegyIO, JLD2
 #' # Initialize all needed data
 
 #' Close all figures if any existing
-SlimPlotting.PyPlot.close(:all)
+plotclose("all")
 
 #' Path to the files and data used for these examples
 data_path = dirname(pathof(SlimPlotting)) * "/../data/";
