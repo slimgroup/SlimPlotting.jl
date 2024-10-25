@@ -4,34 +4,14 @@ using Statistics, ColorSchemes, Reexport
 @reexport using PythonPlot
 
 const cc = PythonPlot.PythonCall.pynew()
-scm = Dict()
-
-
-function tryimport(pkg::String)
-    pyi = try
-        PythonPlot.pyimport(pkg)
-    catch e
-        if get(ENV, "JULIA_CONDAPKG_BACKEND", "conda") == "Null"
-            pyexe = PythonPlot.python_executable_path()
-            run(Cmd(`$(pyexe) -m pip install --user $(pkg)`))
-        else
-            PythonPlot.PythonCall.C.CondaPkg.add_pip(pkg)
-        end
-        PythonPlot.pyimport(pkg)
-    end
-    return pyi
-end
-
+const scm = PythonPlot.PythonCall.pynew()
 
 function __init__()
-    # import seiscm
-    scmp = tryimport("seiscm")
-    global scm["seismic"] = scmp.seismic()
-    global scm["bwr"] = scmp.bwr()
-    global scm["phase"] = scmp.phase()
-    global scm["frequency"] = scmp.frequency()
+    ccall(:jl_generating_output, Cint, ()) == 1 && return nothing
     # Import colorcet
-    PythonPlot.PythonCall.pycopy!(cc, tryimport("colorcet"))
+    PythonPlot.PythonCall.pycopy!(cc, PythonPlot.pyimport("colorcet"))
+    # Import SeisCM
+    PythonPlot.PythonCall.pycopy!(scm, PythonPlot.pyimport("seiscm"))
 end
 
 export plot_fslice, plot_velocity, plot_simage, plot_sdata, wiggle_plot, compare_shots
@@ -49,8 +29,8 @@ to_symbol(x) = x
 
 Return the colormap `name` for seiscm. These colormap are preimported as a dictionnary
 """
-seiscm(s::Symbol) = scm[to_string(s)]
-seiscm(s::String) = scm[s]
+seiscm(s::Symbol) = seiscm(to_string(s))
+seiscm(s::String) = PythonPlot.pygetattr(scm, s)()
 
 """
     _plot_with_units(image, spacing; perc=95, cmap=:cet_CET_L1, 
