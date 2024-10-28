@@ -23,6 +23,7 @@ jobs:
       - name: Install dependencies
         run: |
           julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+          julia -e 'using Pkg; Pkg.add("PythonPlot")'
   
       - name: Setup README
         run: cp README.md docs/src/README.md

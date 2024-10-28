@@ -9,7 +9,7 @@
 #' This example is converted to a markdown file for the documentation.
 
 #' # Import SlimPlotting, SegyIO to read seismic data, JLD2 for hdf5-like files
-using SlimPlotting, SegyIO, JLD2
+using PythonPlot, SlimPlotting, SegyIO, JLD2
 
 #' # Initialize all needed data
 
@@ -54,26 +54,26 @@ shotp = shotrec([shot], 0.008, geometry([xloc]));
 
 #' # Model perturbation
 #' We plot here a model perturbation (i.e a Reverse-time Migrated image) and compare a few colormaps:
-#' - The `seiscm.seimic` colormap
-#' - The standard matplotlib `Greys` colormap
 #' - The perceptually accurate `Greys` colormap from colorcet
+#' - The standard matplotlib `Greys` colormap
+#' - Another perceptually accurate `Greys` colormap from colorcet
 
 figure(figsize = (10, 10))
 subplot(311)
-plot_simage(dmp; new_fig = false, name = "Seismic")
+plot_simage(dmp; new_fig = false, name = "Colorcet Greys")
 subplot(312)
 plot_simage(dm, (10, 20); cmap = "Greys", new_fig = false, name = "Greys")
 subplot(313)
-plot_simage(dm, (10, 20); cmap = :cet_CET_L1, new_fig = false, name = "Colorcet Greys")
+plot_simage(dm, (10, 20); cmap = :cet_CET_L2, new_fig = false, name = "Colorcet Greys 2")
 tight_layout();
 display(gcf());
 
 
 #' #  Velocity
 #' We plot here a velocity model and compare a few colormaps:
-#' - The `seiscm.frequency` colormap
-#' - The ColorSchemes `vik` colormap
 #' - The perceptually accurate `jet` colormap from colorcet named `cet_rainbow4`
+#' - The ColorSchemes `vik` colormap
+#' - The matplotlib `jet`
 
 figure(figsize = (10, 10))
 subplot(311)
@@ -81,16 +81,16 @@ plot_velocity(vpp; new_fig = false, name = "colorcet jet", cmap = "cet_rainbow4"
 subplot(312)
 plot_velocity(vp, (10, 20); cmap = :vik, new_fig = false, name = "ColorSchemes's vik")
 subplot(313)
-plot_velocity(vp, (10, 20); cmap = seiscm(:frequency), new_fig = false, name = "Seiscm")
+plot_velocity(vp, (10, 20); cmap = "jet", new_fig = false, name = "matplotlib jet")
 tight_layout();
 display(gcf());
 
 
 #' #  Frequency slice
 #' We plot here a frequency slice for a seismic dataset and compare a few colormaps:
-#' - The `seiscm.bwr` colormap
-#' - The standard matplotlib `bwr` colormap
 #' - The perceptually accurate `bwr` colormap from colorcet named `cet_CET_D1A`
+#' - The standard matplotlib `bwr` colormap
+#' - The matplotlib "bwr
 
 # Frequency slice
 figure(figsize = (10, 5))
@@ -99,7 +99,7 @@ plot_fslice(fslice["Freq"][1, :, :], (12.5, 12.5); new_fig = false, name = "colo
 subplot(132)
 plot_fslice(fslicep; cmap = :bwr, new_fig = false, name = "bwr")
 subplot(133)
-plot_fslice(fslicep; cmap = seiscm(:bwr), new_fig = false, name = "Seiscm bwr")
+plot_fslice(fslicep; cmap = "bwr", new_fig = false, name = "Matplotlib bwr")
 tight_layout();
 display(gcf());
 
@@ -109,9 +109,8 @@ display(gcf());
 #' ## Seismic blue-white-red
 #' 
 #' We plot here a frequency slice for a seismic dataset and compare a few colormaps for the `bwr` colormap:
-#' - The `seiscm.bwr` colormap
 #' - The standard matplotlib `bwr` colormap
-#' - The perceptually accurate `bwr` colormap from colorcet named `cet_CET_D1A`
+#' - The perceptually accurate `bwr` colormap from colorcet named `cet_CET_D1A` and `cet_CET_D1`
 
 # Shot record
 figure(figsize = (10, 5))
@@ -120,7 +119,7 @@ plot_sdata(shotp; new_fig = false, name = "matplotlib seismic", cmap = "bwr")
 subplot(132)
 plot_sdata(shot, (12.5, 0.008); cmap = :cet_CET_D1A, new_fig = false, name = "Colorcet bwr")
 subplot(133)
-plot_sdata(shot, (12.5, 0.008); cmap = seiscm(:bwr), new_fig = false, name = "Seismic bwr")
+plot_sdata(shot, (12.5, 0.008); cmap = :cet_CET_D1, new_fig = false, name = "Colorcet bwr 2")
 tight_layout();
 display(gcf());
 

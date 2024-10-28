@@ -1,36 +1,49 @@
+__precompile__()
 module SlimPlotting
 
-using Statistics, ColorSchemes, Reexport
-@reexport using PythonPlot
+using Statistics, ColorSchemes
 
-const cc = PythonPlot.PythonCall.pynew()
-const scm = PythonPlot.PythonCall.pynew()
+# Only needed if extension not available (julia < 1.9)
+if !isdefined(Base, :get_extension)
+    using Requires
+end
 
 function __init__()
-    ccall(:jl_generating_output, Cint, ()) == 1 && return nothing
-    # Import colorcet
-    PythonPlot.PythonCall.pycopy!(cc, PythonPlot.pyimport("colorcet"))
-    # Import SeisCM
-    PythonPlot.PythonCall.pycopy!(scm, PythonPlot.pyimport("seiscm"))
+    # Optional dependencies
+    @static if !isdefined(Base, :get_extension)
+        @require PyPlot="d330b81b-6aea-500a-939a-2ce795aea3ee" begin
+            @info "PyPlot compat enabled"
+            include("../ext/PyPlotSlimExt.jl")
+        end
+
+        @require PythonPlot="274fc56d-3b97-40fa-a1cd-1b4a50311bf9" begin
+            @info "PythonPlot compat enabled"
+            include("../ext/PythonPlotSlimExt.jl")
+        end
+    end
 end
 
 export plot_fslice, plot_velocity, plot_simage, plot_sdata, wiggle_plot, compare_shots
-export colorschemes, seiscm
+export colorschemes
+
+function getcmap end
+
+function get_extension()
+    # get backend
+    ext = Base.get_extension(@__MODULE__, :PythonPlotSlimExt)
+    if isnothing(ext)
+        ext = Base.get_extension(@__MODULE__, :PyPlotSlimExt)
+    end
+    isnothing(ext) && throw(MissingException("No plotting backend found, either PyPlot or PythonPlot need to be loaded in the script"))
+
+    return ext.pypltref
+end
 
 # String conversion in case of legacy :symbol input for PyPlot
 to_string(x::Symbol) = string(x)
 to_string(x) = x
 to_symbol(x::String) = Symbol(x)
 to_symbol(x) = x
-
-
-"""
-    seiscm(name)
-
-Return the colormap `name` for seiscm. These colormap are preimported as a dictionnary
-"""
-seiscm(s::Symbol) = seiscm(to_string(s))
-seiscm(s::String) = PythonPlot.pygetattr(scm, s)()
 
 """
     _plot_with_units(image, spacing; perc=95, cmap=:cet_CET_L1, 
@@ -90,14 +103,18 @@ function _plot_with_units(
 
     # color map
     cmap = try
-        ColorMap(to_string(cmap))
+        getcmap(to_string(cmap))
     catch
-        ColorMap(colorschemes[to_symbol(cmap)].colors)
+        getcmap(colorschemes[to_symbol(cmap)].colors)
     end
-    new_fig && figure()
+    
+    backend = get_extension()
+
+    # Create new figure
+    new_fig && backend.figure()
     # Plot
     if !isnothing(alpha)
-        imshow(
+        backend.imshow(
             scaled,
             vmin = ma,
             vmax = a,
@@ -108,7 +125,7 @@ function _plot_with_units(
             alpha = alpha,
         )
     else
-        imshow(
+        backend.imshow(
             scaled,
             vmin = ma,
             vmax = a,
@@ -118,14 +135,14 @@ function _plot_with_units(
             extent = extent,
         )
     end
-    xlabel("$(labels[1]) [$(units[1])]")
-    ylabel("$(labels[2]) [$(units[2])]")
-    title("$name")
-    cbar && colorbar(fraction = 0.046, pad = 0.04)
+    backend.xlabel("$(labels[1]) [$(units[1])]")
+    backend.ylabel("$(labels[2]) [$(units[2])]")
+    backend.title("$name")
+    cbar && backend.colorbar(fraction = 0.046, pad = 0.04)
 
     if ~isnothing(save)
         save == true ? filename = name : filename = save
-        savefig(filename, bbox_inches = "tight", dpi = 150)
+        backend.savefig(filename, bbox_inches = "tight", dpi = 150)
     end
 end
 
@@ -165,7 +182,7 @@ function plot_simage(image; kw...)
         d = (1, 1)
     end
     kwd = Dict(kw)
-    cmap = pop!(kwd, :cmap, seiscm(:seismic))
+    cmap = pop!(kwd, :cmap, :cet_CET_D1A)
     plot_simage(image.data, d; cmap = cmap, kwd...)
 end
 
@@ -332,7 +349,7 @@ function compare_shots(image, image2, spacing; chunksize = 20, kw...)
     else
         cmap2 = pop!(kwd, :cmap, :cet_CET_D1A)
         if cmap2 == cmap1
-            cmap2 = ColorMap(cmap1).reversed()
+            cmap2 = getcmap(cmap1).reversed()
         end
     end
     # Zero out to alternate
@@ -449,19 +466,22 @@ function wiggle_plot(
         error("time_axis must be the same length as the number of rows in data")
     # Time gain
     tg = time_axis .^ t_scale
-    new_fig && figure()
 
-    ylim(maximum(time_axis), minimum(time_axis))
-    xlim(minimum(xrec), maximum(xrec))
+    backend = get_extension()
+
+    new_fig && backend.figure()
+
+    backend.ylim(maximum(time_axis), minimum(time_axis))
+    backend.xlim(minimum(xrec), maximum(xrec))
     for (i, xr) ∈ enumerate(xrec)
         x = tg .* data[:, i]
         x = dx[i] * x ./ maximum(x) .+ xr
         # rescale to avoid large spikes
-        plot(x, time_axis, "k-")
-        fill_betweenx(time_axis, xr, x, where = (x .> xr), color = "k")
+        backend.plot(x, time_axis, "k-")
+        backend.fill_betweenx(time_axis, xr, x, where = (x .> xr), color = "k")
     end
-    xlabel("X")
-    ylabel("Time")
+    backend.xlabel("X")
+    backend.ylabel("Time")
 end
 
 end # module

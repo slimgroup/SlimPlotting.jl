@@ -1,6 +1,0 @@
-[deps]
-colorcet = ""
-
-[pip.deps]
-# Conda package names and versions
-seiscm = ""
