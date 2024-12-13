@@ -11,7 +11,7 @@ function tryimport(pkg::String)
             pyexe = PythonPlot.PythonCall.python_executable_path()
             run(Cmd(`$(pyexe) -m pip install --user $(pkg)`))    
         else
-            PythonPlot.CondaPkg.add_pip(pkg)
+            PythonPlot.PythonCall.C.CondaPkg.add_pip(pkg)
         end
         PythonPlot.pyimport(pkg)
     end
